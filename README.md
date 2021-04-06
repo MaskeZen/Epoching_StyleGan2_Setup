@@ -3,7 +3,11 @@ A small repo containing code from a variety of sources (cited in the README.md) 
 
 My fastpages blog post/notebook: [Latent-Space-Exploration-with-StyleGAN2](https://amarsaini.github.io/Epoching-Blog/jupyter/2020/08/10/Latent-Space-Exploration-with-StyleGAN2.html)
 
-Sources:
+## Steps
+
+`pip install requests Pillow tqdm cmake dlib`
+
+## Sources
 
 - [align_face.py](https://gist.github.com/lzhbrian/bde87ab23b499dd02ba4f588258f57d5)
 - [stylegan2](https://github.com/NVlabs/stylegan2)
