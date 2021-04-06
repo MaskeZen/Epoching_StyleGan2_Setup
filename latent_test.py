@@ -1,12 +1,14 @@
 import sys
-sys.path.append('stylegan2/')
 
+sys.path.append('stylegan2/')
 from stylegan2 import pretrained_networks
 from stylegan2 import dnnlib
 from stylegan2.dnnlib import tflib
 
+from align_face import align_face
 from pathlib import Path
 from PIL import Image
+
 import pickle
 import numpy as np
 
@@ -17,16 +19,29 @@ model_path = 'gdrive:networks/stylegan2-ffhq-config-f.pkl'
 fps = 20
 results_size = 400
 
+## PATHS
+orig_img_path = Path('imgs')
+aligned_imgs_path = Path('aligned_imgs')
+output_imgs = Path('output_imgs')
+output_gifs_path = Path('output_gifs')
+# Make folders if doesn't exist.
+if not output_gifs_path.exists():
+    output_gifs_path.mkdir()
+if not aligned_imgs_path.exists():
+    aligned_imgs_path.mkdir()
+if not output_imgs.exists():
+    output_imgs.mkdir()
+
 # Code to load the StyleGAN2 Model
 def load_model():
     _G, _D, Gs = pretrained_networks.load_networks(model_path)
-    
+
     noise_vars = [var for name, var in Gs.components.synthesis.vars.items() if name.startswith('noise')]
-    
+
     Gs_kwargs = dnnlib.EasyDict()
     Gs_kwargs.output_transform = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
     Gs_kwargs.randomize_noise = False
-    
+
     return Gs, noise_vars, Gs_kwargs
 
 # Generate images given a random seed (Integer)
@@ -53,13 +68,13 @@ def get_concat_h(im1, im2):
     return dst
 
 def make_latent_interp_animation(code1, code2, img1, img2, num_interps):
-    
+
     step_size = 1.0/num_interps
-    
+
     all_imgs = []
-    
+
     amounts = np.arange(0, 1, step_size)
-    
+
     for alpha in tqdm(amounts):
         interpolated_latent_code = linear_interpolate(code1, code2, alpha)
         images = generate_image_from_z(interpolated_latent_code)
@@ -78,12 +93,12 @@ Gs, noise_vars, Gs_kwargs = load_model()
 images, latent_code1 = generate_image_random(42)
 image1 = Image.fromarray(images[0]).resize((results_size, results_size))
 #print('latent_code1.shape'.join(latent_code1.shape))
-image1.save('image1.jpg')
+image1.save('output_imgs/image1.jpg')
 
 images, latent_code2 = generate_image_random(1234)
 image2 = Image.fromarray(images[0]).resize((results_size, results_size))
 #print('latent_code2.shape'.join(latent_code2.shape))
-image2.save('image2.jpg')
+image2.save('output_imgs/image2.jpg')
 
 
 interpolated_latent_code = linear_interpolate(latent_code1, latent_code2, 0.5)
@@ -92,10 +107,18 @@ interpolated_latent_code = linear_interpolate(latent_code1, latent_code2, 0.5)
 images = generate_image_from_z(interpolated_latent_code)
 Image.fromarray(images[0]).resize((results_size, results_size))
 
-#collapse-hide
-output_gifs_path = Path('output_gifs')
-# Make Output Gifs folder if it doesn't exist.
-if not output_gifs_path.exists():
-    output_gifs_path.mkdir()
-
 make_latent_interp_animation(latent_code1, latent_code2, image1, image2, num_interps=200)
+
+
+## ALIGN
+# One-Time Download of Facial Landmark Detection Model Weights
+# if not Path('shape_predictor_68_face_landmarks.dat').exists():
+#     exec('curl --remote-name http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2')
+#     exec('bzip2 -dv shape_predictor_68_face_landmarks.dat.bz2')
+
+# all_imgs = list(orig_img_path.iterdir())
+# for img in all_imgs:
+#     align_face(str(img)).save(aligned_imgs_path/('aligned_'+img.name))
+
+# exec("python -W ignore stylegan2/epoching_custom_run_projector.py project-real-images --network=$model_path \
+#   --dataset=custom_imgs --data-dir=datasets_stylegan2 --num-images=$tot_aligned_imgs --num-snapshots 500")
