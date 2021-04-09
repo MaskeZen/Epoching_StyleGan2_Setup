@@ -192,6 +192,13 @@ if run_latent_direction:
         ).resize((results_size, results_size))
     file_name = 'img_reference_person-'+str(latent_index)+'.jpg'
     img_reference.save(str(output_gifs_path) + '/img_reference_person-'+str(latent_index)+'.jpg')
+
+    print(' ======= latent_codes[latent_index] ======= ')
+    print(latent_codes[latent_index])
+    print(' ======= type(latent_codes[latent_index]) ======= ')
+    print(type(latent_codes[latent_index]))
+    print(latent_codes[latent_index].shape)
+
     # features: 'age', 'eye_distance', 'eye_eyebrow_distance', 'eye_ratio', 'eyes_open', 'gender', 'lip_ratio', 
     # 'mouth_open', 'mouth_ratio', 'nose_mouth_distance', 'nose_ratio', 'nose_tip', 'pitch', 'roll', 'smile', 'yaw'
     make_latent_control_animation(
@@ -217,7 +224,7 @@ if run_latent_direction:
 
 # exec("python -W ignore stylegan2/epoching_custom_run_projector.py project-real-images --network=$model_path \
 #   --dataset=custom_imgs --data-dir=datasets_stylegan2 --num-images=9 --num-snapshots 500")
-# python -W ignore stylegan2/epoching_custom_run_projector.py project-real-images --network='gdrive:networks/stylegan2-ffhq-config-f.pkl' --dataset=custom_imgs --data-dir=datasets_stylegan2 --num-images=9 --num-snapshots 500
+# python -W ignore stylegan2/epoching_custom_run_projector.py project-real-images --network='gdrive:networks/stylegan2-ffhq-config-f.pkl' --dataset=custom_imgs --data-dir=datasets_stylegan2 --num-images=1 --num-snapshots 10
 
 
 
