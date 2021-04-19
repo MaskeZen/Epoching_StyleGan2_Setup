@@ -8,7 +8,7 @@ class Config:
     ## PATHS
     orig_img_path = Path('imgs')
     aligned_imgs_path = Path('aligned_imgs')
-    output_imgs = Path('output_imgs')
+    output_imgs_path = Path('output_imgs')
     output_gifs_path = Path('output_gifs')
     
     # Make folders if doesn't exist.
@@ -16,5 +16,5 @@ class Config:
         output_gifs_path.mkdir()
     if not aligned_imgs_path.exists():
         aligned_imgs_path.mkdir()
-    if not output_imgs.exists():
-        output_imgs.mkdir()
+    if not output_imgs_path.exists():
+        output_imgs_path.mkdir()

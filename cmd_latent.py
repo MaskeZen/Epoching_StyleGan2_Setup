@@ -1,4 +1,5 @@
 
+import os
 from PIL import Image
 from options.cmd_options import CmdOptions
 from ituy_utils.latent_controller import LatentController
@@ -8,11 +9,18 @@ from options.config import Config
 
 opts = CmdOptions().parse()
 
+# SELECT TASK
+opt_task = opts.task
+run_make_gif = opt_task == 'gif'
+run_latent_direction = opt_task == 'direction'
+#------------------
 run_align_images = opts.align
-run_latent_direction = opts.direction
 run_feature = opts.feature
 run_latent_index = opts.latent_index
 get_model = False
+
+opt_amount = opts.amount or 1
+opt_latent_file = opts.latent_file
 
 modelLoader = ModelLoader()
 
@@ -20,24 +28,12 @@ if run_align_images:
     print(' =========== run_align_images =========== ')
     modelLoader.align_images()
 
-if run_latent_direction:
-    print(' =========== run_latent_direction =========== ')
-    print(' =========== feature '+run_feature+' =========== ')
+if run_make_gif:
+    run_feature = run_feature or 'age'
+    print(' =========== run_make_gif feature '+run_feature+' =========== ')
     # latent_controls = get_control_latent_vectors('stylegan2directions/')
     latent_codes = LatentController.get_final_latents()
     latent_index = run_latent_index or 0
-
-    img_reference = Image.fromarray(
-            (modelLoader.generate_image_from_projected_latents(latent_codes[latent_index])[0])
-        ).resize((Config.results_size, Config.results_size))
-    file_name = 'img_reference_person-'+str(latent_index)+'.jpg'
-    img_reference.save(str(Config.output_gifs_path) + '/img_reference_person-'+str(latent_index)+'.jpg')
-
-    print(' ======= latent_codes[latent_index] ======= ')
-    print(latent_codes[latent_index])
-    print(' ======= type(latent_codes[latent_index]) ======= ')
-    print(type(latent_codes[latent_index]))
-    print(latent_codes[latent_index].shape)
 
     # features: 'age', 'eye_distance', 'eye_eyebrow_distance', 'eye_ratio', 'eyes_open', 'gender', 'lip_ratio', 
     # 'mouth_open', 'mouth_ratio', 'nose_mouth_distance', 'nose_ratio', 'nose_tip', 'pitch', 'roll', 'smile', 'yaw'
@@ -51,22 +47,23 @@ if run_latent_direction:
         person='person-'+str(latent_index)
         )
 
-    # len(latent_controls), latent_controls.keys(), latent_controls['age'].shape
+if run_latent_direction:
+    run_feature = run_feature or 'age'
+    print(' =========== run_latent_direction, feature: '+run_feature+' =========== ')
 
-# Create stylegan2 Dataset
-#python -W ignore stylegan2/dataset_tool.py create_from_images datasets_stylegan2/custom_imgs aligned_imgs/
+    ## latent_file
+    latent_code = LatentController.get_latent(opt_latent_file)
+    f_name, f_ext = os.path.splitext(os.path.basename(opt_latent_file))
+    output_filename = 'output_' + run_feature + '_' + str(opt_amount) + '_' + f_name
+    print(' ======= latent_code.shape ======= ')
+    print(latent_code.shape)
 
-## ALIGN
-# One-Time Download of Facial Landmark Detection Model Weights
-# if not Path('shape_predictor_68_face_landmarks.dat').exists():
-#     exec('curl --remote-name http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2')
-#     exec('bzip2 -dv shape_predictor_68_face_landmarks.dat.bz2')
-
-
-# exec("python -W ignore stylegan2/epoching_custom_run_projector.py project-real-images --network=$model_path \
-#   --dataset=custom_imgs --data-dir=datasets_stylegan2 --num-images=9 --num-snapshots 500")
-# python -W ignore stylegan2/epoching_custom_run_projector.py project-real-images --network='gdrive:networks/stylegan2-ffhq-config-f.pkl' --dataset=custom_imgs --data-dir=datasets_stylegan2 --num-images=1 --num-snapshots 10
-
-
-
-
+    # features: 'age', 'eye_distance', 'eye_eyebrow_distance', 'eye_ratio', 'eyes_open', 'gender', 'lip_ratio', 
+    # 'mouth_open', 'mouth_ratio', 'nose_mouth_distance', 'nose_ratio', 'nose_tip', 'pitch', 'roll', 'smile', 'yaw'
+    LatentController.make_latent_control_image(
+        model_loader=modelLoader,
+        amount=opt_amount,
+        feature=run_feature,
+        latent_code=latent_code,
+        output_name=output_filename
+    )

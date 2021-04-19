@@ -30,6 +30,12 @@ class LatentController:
         
         return all_final_latents
 
+    def get_latent(latent_file):
+        latent_code = None
+        with open(latent_file, mode='rb') as latent_pickle:
+                latent_code = pickle.load(latent_pickle)        
+        return latent_code
+
     def make_latent_control_animation(model_loader, latent_code, feature, start_amount, end_amount, step_size, person):
     
         all_imgs = []
@@ -47,6 +53,17 @@ class LatentController:
 
         save_name = Config.output_gifs_path/'{0}_{1}.gif'.format(person, feature)
         all_imgs[0].save(save_name, save_all=True, append_images=all_imgs[1:], duration=1000/Config.fps, loop=0)
+
+    def make_latent_control_image(model_loader, latent_code, feature, amount, output_name):
+        latent_controls = LatentController.get_control_latent_vectors('stylegan2directions/')
+        
+        modified_latent_code = np.array(latent_code)
+        modified_latent_code += latent_controls[feature]*amount
+        images = model_loader.generate_image_from_projected_latents(modified_latent_code)
+        latent_img = Image.fromarray(images[0]).resize((Config.results_size, Config.results_size))
+
+        save_name = Config.output_imgs_path/'{0}_{1}.jpg'.format(output_name, feature)
+        latent_img.save(save_name)
 
     def linear_interpolate(code1, code2, alpha):
         return code1 * alpha + code2 * (1 - alpha)

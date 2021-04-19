@@ -15,7 +15,10 @@ Get help
 `python cmd_latent.py -h`
 
 Make a gif with the age direction.
-`python cmd_latent.py -d -f age`
+`python cmd_latent.py --task gif --feature age`
+
+Get a jpg with the age direction.
+`python cmd_latent.py --task direction --feature age --amount 2 --latent-file 'inputs/dalton_latent_code.pkl'`
 
 ## Sources
 
