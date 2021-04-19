@@ -7,6 +7,16 @@ My fastpages blog post/notebook: [Latent-Space-Exploration-with-StyleGAN2](https
 
 `pip install requests Pillow tqdm cmake dlib`
 
+## Tests
+
+### cmd line interface
+
+Get help
+`python cmd_latent.py -h`
+
+Make a gif with the age direction.
+`python cmd_latent.py -d -f age`
+
 ## Sources
 
 - [align_face.py](https://gist.github.com/lzhbrian/bde87ab23b499dd02ba4f588258f57d5)

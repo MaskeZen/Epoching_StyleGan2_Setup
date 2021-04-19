@@ -7,3 +7,7 @@ imgs
 aligned_imgs
 datasets_stylegan2
 shape_predictor_68_face_landmarks.dat
+
+# Logfiles
+*.log
+history*.txt
